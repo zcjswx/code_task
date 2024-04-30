@@ -7,23 +7,23 @@ import (
 )
 
 type Edge struct {
-	Id   string  `xml:"id"`
-	From string  `xml:"from"`
-	To   string  `xml:"to"`
-	Cost float64 `xml:"cost"`
+	Id   string  `xml:"id" gorm:"column:edge_id"`
+	From string  `xml:"from" gorm:"from"`
+	To   string  `xml:"to" gorm:"to"`
+	Cost float64 `xml:"cost" gorm:"cost"`
 }
 
 type Node struct {
-	Id   string `xml:"id"`
-	Name string `xml:"name"`
+	Id   string `xml:"id" gorm:"column:node_id"`
+	Name string `xml:"name" gorm:"name"`
 }
 
 type Graph struct {
-	XMLName xml.Name `xml:"graph"`
-	Id      string   `xml:"id"`
-	Name    string   `xml:"name"`
-	Nodes   []Node   `xml:"nodes>node"`
-	Edges   []Edge   `xml:"edges>node"`
+	XMLName xml.Name `xml:"graph" gorm:"-"`
+	Id      string   `xml:"id" gorm:"column:graph_id"`
+	Name    string   `xml:"name" gorm:"name"`
+	Nodes   []Node   `xml:"nodes>node" gorm:"-"`
+	Edges   []Edge   `xml:"edges>node" gorm:"-"`
 }
 
 func (g *Graph) Parse(data []byte) error {
