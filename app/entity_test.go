@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -11,5 +12,15 @@ func TestGraphEntity_create(t *testing.T) {
 	_ = g.Parse(data)
 
 	ge := GraphEntity{Graph: g}
-	ge.create()
+	err := ge.create()
+	assert.NoError(t, err)
+}
+
+func TestGraphEntity_findLatest(t *testing.T) {
+	latest, err := findLatestGraph()
+
+	assert.NoError(t, err)
+	assert.NotNil(t, latest)
+	assert.NotNil(t, latest.Nodes)
+	assert.NotNil(t, latest.Edges)
 }

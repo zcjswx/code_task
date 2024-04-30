@@ -22,8 +22,8 @@ type Graph struct {
 	XMLName xml.Name `xml:"graph" gorm:"-"`
 	Id      string   `xml:"id" gorm:"column:graph_id"`
 	Name    string   `xml:"name" gorm:"name"`
-	Nodes   []Node   `xml:"nodes>node" gorm:"-"`
-	Edges   []Edge   `xml:"edges>node" gorm:"-"`
+	Nodes   []*Node  `xml:"nodes>node" gorm:"-"`
+	Edges   []*Edge  `xml:"edges>node" gorm:"-"`
 }
 
 func (g *Graph) Parse(data []byte) error {

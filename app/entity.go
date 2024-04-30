@@ -28,6 +28,7 @@ type EdgeEntity struct {
 	*Edge
 	RefFromNodeId uint `gorm:"ref_from_node_id"`
 	RefToNodeId   uint `gorm:"ref_to_node_id"`
+	RefGraphId    uint `gorm:"ref_graph_id"`
 }
 
 func (EdgeEntity) TableName() string {
@@ -54,7 +55,7 @@ func (g *GraphEntity) create() error {
 
 	// Insert nodes
 	for _, node := range g.Nodes {
-		n := &NodeEntity{Node: &node}
+		n := &NodeEntity{Node: node}
 		n.RefGraphId = g.ID
 		if err := tx.Create(n).Error; err != nil {
 			tx.Rollback()
@@ -66,9 +67,10 @@ func (g *GraphEntity) create() error {
 
 	// Insert edges with mapped node IDs
 	for _, edge := range g.Edges {
-		e := &EdgeEntity{Edge: &edge}
+		e := &EdgeEntity{Edge: edge}
 		e.RefFromNodeId = nodeIDMap[e.From]
 		e.RefToNodeId = nodeIDMap[e.To]
+		e.RefGraphId = g.ID
 		if err := tx.Create(e).Error; err != nil {
 			tx.Rollback()
 			logger.Errorf("err when saving edges %s", err)
@@ -82,4 +84,39 @@ func (g *GraphEntity) create() error {
 		return err
 	}
 	return nil
+}
+
+func findLatestGraph() (*Graph, error) {
+	ge := &GraphEntity{}
+	err := db.Last(ge).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var nodes []*NodeEntity
+	err = db.Find(&nodes, NodeEntity{RefGraphId: ge.ID}).Error
+	if err != nil {
+		return nil, err
+	}
+	nodeList := make([]*Node, len(nodes))
+	for i, n := range nodes {
+		node := n.Node
+		nodeList[i] = node
+	}
+	ge.Nodes = nodeList
+
+	var edges []*EdgeEntity
+	err = db.Find(&edges, EdgeEntity{RefGraphId: ge.ID}).Error
+	if err != nil {
+		return nil, err
+	}
+	edgeList := make([]*Edge, len(edges))
+	for i, e := range edges {
+		edge := e.Edge
+		edgeList[i] = edge
+	}
+	ge.Edges = edgeList
+
+	return ge.Graph, nil
+
 }
