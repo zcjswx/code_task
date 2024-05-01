@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"slices"
@@ -149,4 +150,56 @@ func topologicalSort(g *Graph) ([]string, error) {
 	}
 
 	return topoOrder, nil
+}
+
+func readQueryFromJsonStr(str string) (*QuerySet, error) {
+	var qs QuerySet
+	err := json.Unmarshal([]byte(str), &qs)
+	if err != nil {
+		fmt.Println("Error parsing JSON: ", err)
+		return nil, err
+	}
+	return &qs, nil
+}
+
+func Process(jsonStr string) (string, error) {
+
+	qs, err := readQueryFromJsonStr(jsonStr)
+	if err != nil {
+		logger.Error(err)
+		return "", err
+	}
+	err = qs.process()
+	if err != nil {
+		logger.Error(err)
+		return "", err
+	}
+
+	jsonRes, err := json.Marshal(qs)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonRes), nil
+}
+
+func (qs *QuerySet) process() error {
+	graph, err := findLatestGraph()
+	if err != nil {
+		return err
+	}
+	for _, q := range qs.Queries {
+		if q.Cheapest != nil {
+			err := q.Cheapest.FindCheapest(graph)
+			if err != nil {
+				logger.Error(err)
+			}
+		}
+		if q.Paths != nil {
+			err := q.Paths.findAllPaths(graph)
+			if err != nil {
+				logger.Error(err)
+			}
+		}
+	}
+	return nil
 }

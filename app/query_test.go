@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -56,4 +57,32 @@ func Test_findCheapest(t *testing.T) {
 	path, err := findCheapest("3", "1", g)
 	assert.NoError(t, err)
 	assert.Equal(t, len(path), 4)
+}
+
+func TestProcess(t *testing.T) {
+	str := `{
+  "queries": [
+    {
+      "paths": {
+        "start": "3",
+        "end": "1"
+      }
+    },
+    {
+      "cheapest": {
+        "start": "3",
+        "end": "1"
+      }
+    },
+    {
+      "cheapest": {
+        "start": "3",
+        "end": "2"
+      }
+    }
+  ]
+}`
+	res, err := Process(str)
+	assert.NoError(t, err)
+	fmt.Println(res)
 }
