@@ -1,0 +1,28 @@
+{
+  "queries": [
+    {
+      "paths": {
+        "start": "3",
+        "end": "1"
+      }
+    },
+    {
+      "cheapest": {
+        "start": "3",
+        "end": "1"
+      }
+    },
+    {
+      "cheapest": {
+        "start": "3",
+        "end": "2"
+      }
+    },
+    {
+      "cheapest": {
+        "start": "1",
+        "end": "0"
+      }
+    }
+  ]
+}
