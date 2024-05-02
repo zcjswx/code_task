@@ -3,6 +3,8 @@ package app
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
+	"os"
 	"strings"
 )
 
@@ -67,6 +69,8 @@ func (g *Graph) validate() (err error) {
 		for _, v := range g.Nodes {
 			if _, ok := nodeIdMap[v.Id]; ok {
 				return errors.New("all nodes must have different <id> tags")
+			} else {
+				nodeIdMap[v.Id] = struct{}{}
 			}
 		}
 		return nil
@@ -78,12 +82,15 @@ func (g *Graph) validate() (err error) {
 	validateEdge := func(g *Graph) error {
 		for _, v := range g.Edges {
 
-			if v.From == v.To {
-				return errors.New("from and to must be different")
+			if _, ok := nodeIdMap[v.From]; !ok {
+				return errors.New(fmt.Sprintf("node %s not defined", v.Id))
+			}
+			if _, ok := nodeIdMap[v.To]; !ok {
+				return errors.New(fmt.Sprintf("node %s not defined", v.Id))
 			}
 
-			if _, ok := nodeIdMap[v.Id]; !ok {
-				return errors.New("node must have been defined")
+			if v.Cost < 0 {
+				return errors.New(fmt.Sprintf("cost of %s must be non-negative", v.Id))
 			}
 		}
 		return nil
@@ -93,4 +100,35 @@ func (g *Graph) validate() (err error) {
 	}
 
 	return
+}
+
+func ProcessGraph(url string) error {
+	filePath, err := DownloadFileToTmp(url)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	g := &Graph{}
+	err = g.Parse(data)
+
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	ge := &GraphEntity{Graph: g}
+	err = ge.create()
+
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+	return nil
 }

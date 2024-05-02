@@ -54,6 +54,9 @@ func Test_findCheapest(t *testing.T) {
 		Edges: []*Edge{edgea, edgeb, edgec, edged, edgee, edgef, edgeg, edgeh},
 	}
 
+	ge := &GraphEntity{Graph: g}
+	ge.create()
+
 	path, err := findCheapest("3", "1", g)
 	assert.NoError(t, err)
 	assert.Equal(t, len(path), 4)
@@ -78,6 +81,12 @@ func TestProcess(t *testing.T) {
       "cheapest": {
         "start": "3",
         "end": "2"
+      }
+    },
+{
+      "cheapest": {
+        "start": "1",
+        "end": "0"
       }
     }
   ]

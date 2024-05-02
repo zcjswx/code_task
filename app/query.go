@@ -19,9 +19,9 @@ type Path struct {
 }
 
 type Cheapest struct {
-	Start string   `json:"start"`
-	End   string   `json:"end"`
-	Path  []string `json:"path,omitempty"`
+	Start string      `json:"start"`
+	End   string      `json:"end"`
+	Path  interface{} `json:"path,omitempty"`
 }
 
 type QuerySet struct {
@@ -33,8 +33,11 @@ func (c *Cheapest) FindCheapest(g *Graph) error {
 	if err != nil {
 		logger.Errorf(err.Error())
 	}
-
-	c.Path = path
+	if len(path) == 0 {
+		c.Path = false
+	} else {
+		c.Path = path
+	}
 	return nil
 }
 
@@ -192,12 +195,14 @@ func (qs *QuerySet) process() error {
 			err := q.Cheapest.FindCheapest(graph)
 			if err != nil {
 				logger.Error(err)
+				continue
 			}
 		}
 		if q.Paths != nil {
 			err := q.Paths.findAllPaths(graph)
 			if err != nil {
 				logger.Error(err)
+				continue
 			}
 		}
 	}
