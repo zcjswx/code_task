@@ -1,3 +1,6 @@
+//go:build build
+// +build build
+
 package app
 
 import (
